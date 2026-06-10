@@ -20,7 +20,8 @@ auto-downloads Fabric loader + the mod set, and launches straight into the serve
 - The **7-mod client set**: mtr-nextgen, fabric-api 0.119.4, sodium 0.6.13,
   lithium 0.15.3, ferritecore 7.1.3, Debugify 1.1, modmenu 13.0.4
 - Server profile id: `foundrymtr-1.21.4` · display name `FoundryMTR`
-- Autoconnect address: `<SERVER_ADDRESS>` — confirm with the owner at publish
+- Autoconnect address: `mc.foundrymtr.com:25565` (DNS A record, gray-cloud/DNS-only —
+  never proxy the Minecraft host)
 - Java 21 (MC 1.21.4 requirement)
 
 **Canonical identity** (full table: `docs/REBRAND_TO_FOUNDRYMTR.md` §2):
@@ -123,7 +124,9 @@ are overwritten.
    `<DISCORD_CLIENT_ID>` in `distribution\distribution.json`.
 2. **Azure app approval** for Microsoft login (`aka.ms/mce-reviewappid`). The
    wired client id is kept; login fails until Microsoft approves.
-3. **Confirm `<SERVER_ADDRESS>`** before the first `distribution.json` publish.
+3. ~~Confirm the server address~~ **RESOLVED (2026-06-10):** `mc.foundrymtr.com:25565`
+   is canonical and set in the staging manifest (DNS record creation is in the
+   Cloudflare dashboard checklist).
 4. **Publish `news.txt`** at the canonical URL or The Dispatch shows "Wire down."
 5. **Re-render brand PNGs** — run `branding\render_branding.py` (needs Python +
    Pillow + a bold TTF) to regenerate `icon_*.png`, `logo_320x320.png`,

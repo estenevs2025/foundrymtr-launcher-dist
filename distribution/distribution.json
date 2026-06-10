@@ -17,7 +17,7 @@
       "description": "The official FoundryMTR modded server - auto-installs all required mods and connects you straight in.",
       "icon": "https://files.foundrymtr.com/assets/icons/SealCircle.png",
       "version": "1.0.0",
-      "address": "<SERVER_ADDRESS>",
+      "address": "mc.foundrymtr.com:25565",
       "minecraftVersion": "1.21.4",
       "discord": {
         "shortId": "FoundryMTR",

@@ -1,0 +1,434 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FOUNDRYMTR LAUNCHER — Custom Theme
+   ═══════════════════════════════════════════════════════════════════════
+   This file is loaded AFTER launcher.css to override Helios defaults.
+
+   Installation:
+     1. Save this file as:  app/assets/css/foundrymtr-theme.css
+     2. In app/landing.ejs (and other .ejs files), add this line after the
+        existing <link> to launcher.css:
+          <link rel="stylesheet" href="assets/css/foundrymtr-theme.css">
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Import Inter from Google Fonts. If you want fully offline, download the
+   font files and reference them locally with @font-face. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+:root {
+    /* FoundryMTR color tokens */
+    --fmtr-ink:       #0A0E14;
+    --fmtr-rail:      #151B23;
+    --fmtr-platform:  #1F2730;
+    --fmtr-chalk:     #F2F4F7;
+    --fmtr-fog:       #8B95A3;
+    --fmtr-signal:    #E8252B;
+    --fmtr-amber:     #F5A623;
+    --fmtr-green:     #00C896;
+    --fmtr-platinum:  #C4CDD9;
+
+    /* Override Helios variables if they exist */
+    --background-color: var(--fmtr-ink);
+    --primary-color:    var(--fmtr-signal);
+    --accent-color:     var(--fmtr-signal);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BASE — typography and body
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body, html {
+    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    background: var(--fmtr-ink) !important;
+    color: var(--fmtr-chalk) !important;
+    font-feature-settings: 'tnum' 1, 'cv11' 1;  /* tabular nums + alt 6/9 */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* All text defaults to Inter */
+* {
+    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    letter-spacing: 0.01em;
+}
+
+/* System status labels and metadata get tracked-out caps */
+.fmtr-label,
+.serverListingDetailsHeader,
+.mojangStatusName,
+#user_text,
+#avatarOverlay {
+    text-transform: uppercase;
+    letter-spacing: 0.18em !important;
+    font-weight: 500;
+    font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FRAME — window chrome and main containers
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.frame,
+#main {
+    background: var(--fmtr-ink) !important;
+}
+
+#frameBar {
+    background: var(--fmtr-ink) !important;
+    border-bottom: 1px solid var(--fmtr-platform);
+    height: 32px;
+}
+
+#frameTitleDock {
+    color: var(--fmtr-fog);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+/* Window control buttons (min/max/close) */
+.frameButton {
+    transition: background 120ms ease;
+}
+.frameButton:hover {
+    background: var(--fmtr-platform) !important;
+}
+#frameButton_close:hover {
+    background: var(--fmtr-signal) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LANDING — the main "ready to play" screen
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#landingContainer {
+    background: var(--fmtr-ink) !important;
+}
+
+/* The big PLAY button — make it the primary signal-colored CTA */
+#launch_button {
+    background: var(--fmtr-signal) !important;
+    color: var(--fmtr-chalk) !important;
+    border: none !important;
+    border-radius: 0 !important;          /* sharp corners — this is signage */
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    letter-spacing: 0.25em !important;
+    text-transform: uppercase !important;
+    padding: 18px 48px !important;
+    transition: all 150ms ease;
+    position: relative;
+}
+
+#launch_button::before {
+    content: '▶  ';
+    color: var(--fmtr-chalk);
+    font-weight: 900;
+}
+
+#launch_button:hover {
+    background: var(--fmtr-chalk) !important;
+    color: var(--fmtr-signal) !important;
+    transform: translateY(-1px);
+}
+
+#launch_button:active {
+    transform: translateY(0);
+}
+
+#launch_button:disabled {
+    background: var(--fmtr-platform) !important;
+    color: var(--fmtr-fog) !important;
+    cursor: not-allowed;
+}
+
+/* Progress bar for downloads */
+#launch_progress {
+    background: var(--fmtr-rail) !important;
+    border: 1px solid var(--fmtr-platform);
+    border-radius: 0 !important;
+    height: 4px;
+}
+
+#launch_progress_label {
+    color: var(--fmtr-fog);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-variant-numeric: tabular-nums;
+}
+
+#launch_details {
+    color: var(--fmtr-chalk);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATUS PANEL — Mojang services, server info
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#right_cont,
+#left_cont {
+    background: var(--fmtr-rail) !important;
+    border-left: 1px solid var(--fmtr-platform);
+}
+
+.mojangStatusContainer {
+    background: transparent !important;
+}
+
+.mojangStatusName {
+    color: var(--fmtr-fog) !important;
+}
+
+.mojangStatusIcon {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 0 !important;          /* square indicators, not circles */
+}
+
+.mojangStatusIcon.green { background: var(--fmtr-green) !important; }
+.mojangStatusIcon.yellow { background: var(--fmtr-amber) !important; }
+.mojangStatusIcon.red { background: var(--fmtr-signal) !important; }
+.mojangStatusIcon.grey { background: var(--fmtr-fog) !important; }
+
+/* Server info card — the destination board */
+#server_selection_button,
+.serverListing {
+    background: var(--fmtr-rail) !important;
+    border: 1px solid var(--fmtr-platform) !important;
+    border-left: 4px solid var(--fmtr-signal) !important;
+    border-radius: 0 !important;
+    padding: 16px !important;
+}
+
+#server_selection_button:hover {
+    background: var(--fmtr-platform) !important;
+    border-left-color: var(--fmtr-chalk) !important;
+}
+
+.serverListingName {
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    letter-spacing: 0.05em !important;
+    color: var(--fmtr-chalk) !important;
+}
+
+.serverListingDescription {
+    color: var(--fmtr-fog) !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOGIN SCREEN
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#loginContainer {
+    background: var(--fmtr-ink) !important;
+}
+
+#loginCancelButton,
+#loginButton {
+    background: var(--fmtr-signal) !important;
+    color: var(--fmtr-chalk) !important;
+    border-radius: 0 !important;
+    border: none !important;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    padding: 14px 32px;
+    transition: all 150ms ease;
+}
+
+#loginButton:hover {
+    background: var(--fmtr-chalk) !important;
+    color: var(--fmtr-signal) !important;
+}
+
+#loginCancelButton {
+    background: transparent !important;
+    color: var(--fmtr-fog) !important;
+    border: 1px solid var(--fmtr-platform) !important;
+}
+
+#loginCancelButton:hover {
+    background: var(--fmtr-platform) !important;
+    color: var(--fmtr-chalk) !important;
+}
+
+/* Login form fields (if Helios shows any input fields) */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    background: var(--fmtr-rail) !important;
+    border: 1px solid var(--fmtr-platform) !important;
+    border-radius: 0 !important;
+    color: var(--fmtr-chalk) !important;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
+    transition: border-color 120ms ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+    border-color: var(--fmtr-signal) !important;
+    outline: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SETTINGS PANEL
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#settingsContainer {
+    background: var(--fmtr-ink) !important;
+}
+
+.settingsTab {
+    border-bottom: 2px solid transparent !important;
+    color: var(--fmtr-fog) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    font-size: 12px;
+    padding: 14px 18px !important;
+    transition: all 150ms ease;
+}
+
+.settingsTab:hover {
+    color: var(--fmtr-chalk) !important;
+    border-bottom-color: var(--fmtr-platform) !important;
+}
+
+.settingsTab.selected {
+    color: var(--fmtr-chalk) !important;
+    border-bottom-color: var(--fmtr-signal) !important;
+}
+
+.settingsButton {
+    background: transparent !important;
+    border: 1px solid var(--fmtr-platform) !important;
+    color: var(--fmtr-chalk) !important;
+    border-radius: 0 !important;
+    padding: 10px 20px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 150ms ease;
+}
+
+.settingsButton:hover {
+    border-color: var(--fmtr-signal) !important;
+    color: var(--fmtr-signal) !important;
+}
+
+.settingsButton.primary {
+    background: var(--fmtr-signal) !important;
+    color: var(--fmtr-chalk) !important;
+    border-color: var(--fmtr-signal) !important;
+}
+
+.settingsButton.primary:hover {
+    background: var(--fmtr-chalk) !important;
+    color: var(--fmtr-signal) !important;
+}
+
+/* Slider tracks (memory allocation, etc.) */
+input[type="range"] {
+    -webkit-appearance: none;
+    background: var(--fmtr-platform);
+    height: 4px;
+    border-radius: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--fmtr-signal);
+    border-radius: 0;
+    cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ACCOUNT / USER DISPLAY
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#user_content {
+    background: var(--fmtr-rail) !important;
+    border: 1px solid var(--fmtr-platform) !important;
+    border-radius: 0 !important;
+}
+
+#user_text {
+    color: var(--fmtr-chalk) !important;
+    font-weight: 600 !important;
+}
+
+#avatarOverlay {
+    background: rgba(232, 37, 43, 0.9) !important;
+    border-radius: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HIDE — single-server mode trims unnecessary UI
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* If you only have one server (FoundryMTR), the news/dropdown clutter the UI.
+   Uncomment any of these to hide them. */
+
+/* Hide the news button (you can re-enable later if you add a news feed) */
+#newsButton {
+    display: none !important;
+}
+
+/* If you want to hide the entire server-switcher (because there's only one) */
+/* #server_selection_container { display: none !important; } */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ANIMATIONS — restrained, infrastructural
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes fmtr-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.mojangStatusIcon.yellow,
+.mojangStatusIcon.red {
+    animation: fmtr-pulse 1.8s ease-in-out infinite;
+}
+
+/* Subtle entrance animation for landing */
+@keyframes fmtr-arrive {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+#landingContainer > * {
+    animation: fmtr-arrive 360ms ease-out backwards;
+}
+#landingContainer > *:nth-child(1) { animation-delay: 0ms; }
+#landingContainer > *:nth-child(2) { animation-delay: 60ms; }
+#landingContainer > *:nth-child(3) { animation-delay: 120ms; }
+#landingContainer > *:nth-child(4) { animation-delay: 180ms; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SCROLLBAR — match the theme instead of OS default
+   ═══════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--fmtr-rail);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--fmtr-platform);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--fmtr-signal);
+}

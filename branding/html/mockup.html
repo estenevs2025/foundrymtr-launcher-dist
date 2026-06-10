@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FoundryMTR Launcher — Visual Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fmtr-ink:       #0A0E14;
+    --fmtr-rail:      #151B23;
+    --fmtr-platform:  #1F2730;
+    --fmtr-chalk:     #F2F4F7;
+    --fmtr-fog:       #8B95A3;
+    --fmtr-signal:    #E8252B;
+    --fmtr-amber:     #F5A623;
+    --fmtr-green:     #00C896;
+    --fmtr-platinum:  #C4CDD9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #000;
+    color: var(--fmtr-chalk);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Mock launcher window */
+  .launcher {
+    width: 1024px;
+    height: 640px;
+    background: var(--fmtr-ink);
+    border: 1px solid var(--fmtr-platform);
+    display: grid;
+    grid-template-rows: 36px 1fr 56px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Title bar */
+  .titlebar {
+    background: var(--fmtr-ink);
+    border-bottom: 1px solid var(--fmtr-platform);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .titlebar-title {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--fmtr-fog);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .titlebar-controls {
+    display: flex;
+    gap: 4px;
+  }
+  .titlebar-btn {
+    width: 24px; height: 24px;
+    background: transparent;
+    border: none;
+    color: var(--fmtr-fog);
+    cursor: pointer;
+    font-size: 10px;
+    display: grid;
+    place-items: center;
+    transition: all 120ms ease;
+  }
+  .titlebar-btn:hover { background: var(--fmtr-platform); color: var(--fmtr-chalk); }
+  .titlebar-btn.close:hover { background: var(--fmtr-signal); }
+
+  /* Main content area */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    overflow: hidden;
+  }
+
+  /* Background image area */
+  .stage {
+    position: relative;
+    padding: 48px;
+    background:
+      linear-gradient(180deg, transparent 0%, rgba(10, 14, 20, 0.6) 60%, var(--fmtr-ink) 100%),
+      radial-gradient(ellipse at top right, rgba(232, 37, 43, 0.08) 0%, transparent 50%),
+      repeating-linear-gradient(
+        90deg,
+        var(--fmtr-rail) 0px,
+        var(--fmtr-rail) 1px,
+        var(--fmtr-ink) 1px,
+        var(--fmtr-ink) 80px
+      );
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Logo block top-left */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .roundel {
+    width: 64px;
+    height: 64px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .roundel svg { width: 100%; height: 100%; }
+
+  .brand-text { display: flex; flex-direction: column; }
+  .brand-text .name {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+  }
+  .brand-text .sub {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--fmtr-fog);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Big departure board */
+  .departures {
+    margin-top: auto;
+  }
+  .departures-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--fmtr-fog);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .departures h1 {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  .departures h1 .accent {
+    color: var(--fmtr-signal);
+  }
+  .departures .destination {
+    font-size: 14px;
+    color: var(--fmtr-fog);
+    letter-spacing: 0.05em;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  /* Right sidebar */
+  .sidebar {
+    background: var(--fmtr-rail);
+    border-left: 1px solid var(--fmtr-platform);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+  }
+
+  .panel {
+    border-top: 1px solid var(--fmtr-platform);
+    padding-top: 20px;
+  }
+  .panel:first-child { border-top: none; padding-top: 0; }
+
+  .panel-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--fmtr-fog);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  /* Status indicators */
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 12px;
+  }
+  .status-name {
+    color: var(--fmtr-chalk);
+    font-weight: 500;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .status-dot.green { background: var(--fmtr-green); }
+  .status-dot.amber { background: var(--fmtr-amber); }
+  .status-dot.red { background: var(--fmtr-signal); }
+
+  .status-value {
+    font-size: 11px;
+    color: var(--fmtr-fog);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Server card */
+  .server-card {
+    background: var(--fmtr-platform);
+    border-left: 4px solid var(--fmtr-signal);
+    padding: 16px;
+  }
+  .server-card .server-name {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    letter-spacing: 0.03em;
+  }
+  .server-card .server-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fmtr-fog);
+  }
+  .server-card .server-meta strong {
+    color: var(--fmtr-chalk);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    display: block;
+    margin-top: 4px;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+  }
+  .server-card .server-meta .online strong {
+    color: var(--fmtr-green);
+  }
+
+  /* User block */
+  .user-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--fmtr-platform);
+  }
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--fmtr-signal);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: var(--fmtr-chalk);
+    font-size: 16px;
+  }
+  .user-name {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .user-status {
+    font-size: 10px;
+    color: var(--fmtr-green);
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    margin-top: 2px;
+  }
+
+  /* Bottom action bar */
+  .actionbar {
+    background: var(--fmtr-rail);
+    border-top: 1px solid var(--fmtr-platform);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+  }
+
+  .progress-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+  .progress-bar {
+    width: 280px;
+    height: 3px;
+    background: var(--fmtr-platform);
+    position: relative;
+  }
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: var(--fmtr-green);
+  }
+  .progress-text {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--fmtr-fog);
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Primary CTA */
+  .launch-btn {
+    background: var(--fmtr-signal);
+    color: var(--fmtr-chalk);
+    border: none;
+    padding: 16px 40px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 150ms ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .launch-btn::before {
+    content: '▶';
+    font-size: 12px;
+  }
+  .launch-btn:hover {
+    background: var(--fmtr-chalk);
+    color: var(--fmtr-signal);
+  }
+
+  /* Caption below mockup */
+  .caption {
+    position: absolute;
+    bottom: -32px;
+    left: 0;
+    font-size: 11px;
+    color: var(--fmtr-fog);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="launcher">
+
+  <!-- ─── Title bar ─── -->
+  <div class="titlebar">
+    <div class="titlebar-title">FOUNDRYMTR LAUNCHER · v1.0.0</div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn">─</button>
+      <button class="titlebar-btn">◻</button>
+      <button class="titlebar-btn close">✕</button>
+    </div>
+  </div>
+
+  <!-- ─── Main content ─── -->
+  <div class="main">
+
+    <!-- Stage (main visual area) -->
+    <div class="stage">
+
+      <!-- Logo block top-left -->
+      <div class="brand">
+        <div class="roundel">
+          <svg viewBox="0 0 256 256">
+            <circle cx="128" cy="128" r="100" fill="none" stroke="#E8252B" stroke-width="14"/>
+            <circle cx="128" cy="128" r="93" fill="#0A0E14"/>
+            <rect x="20" y="108" width="216" height="40" fill="#E8252B"/>
+            <text x="128" y="142" text-anchor="middle" font-family="Inter" font-weight="900" font-size="48" fill="#F2F4F7" letter-spacing="2">FMTR</text>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="name">MINECRAFT RAILWAY SERVER</div>
+          <div class="sub">PASSENGER LAUNCHER</div>
+        </div>
+      </div>
+
+      <!-- Departure board -->
+      <div class="departures">
+        <div class="departures-label">NEXT DEPARTURE</div>
+        <h1>READY TO<br>BOARD <span class="accent">▸</span></h1>
+        <p class="destination">All mods verified. Java runtime ready. Network connection established. Press the boarding button when ready to depart for FoundryMTR.</p>
+      </div>
+
+    </div>
+
+    <!-- Right sidebar -->
+    <div class="sidebar">
+
+      <!-- User -->
+      <div class="user-block">
+        <div class="user-avatar">E</div>
+        <div>
+          <div class="user-name">Evan</div>
+          <div class="user-status">● AUTHENTICATED</div>
+        </div>
+      </div>
+
+      <!-- Server panel -->
+      <div class="panel">
+        <div class="panel-label">DESTINATION</div>
+        <div class="server-card">
+          <div class="server-name">FoundryMTR · MAIN NETWORK</div>
+          <div style="font-size:11px; color: var(--fmtr-fog); line-height:1.5;">
+            <SERVER_ADDRESS>
+          </div>
+          <div class="server-meta">
+            <div class="online">
+              ONLINE
+              <strong>34/100</strong>
+            </div>
+            <div>
+              PING
+              <strong>42ms</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System status -->
+      <div class="panel">
+        <div class="panel-label">SYSTEM STATUS</div>
+        <div class="status-row">
+          <span class="status-name"><span class="status-dot green"></span>Mojang Auth</span>
+          <span class="status-value">NOMINAL</span>
+        </div>
+        <div class="status-row">
+          <span class="status-name"><span class="status-dot green"></span>Mojang Session</span>
+          <span class="status-value">NOMINAL</span>
+        </div>
+        <div class="status-row">
+          <span class="status-name"><span class="status-dot green"></span>Xbox Live</span>
+          <span class="status-value">NOMINAL</span>
+        </div>
+        <div class="status-row">
+          <span class="status-name"><span class="status-dot amber"></span>Skins</span>
+          <span class="status-value">DEGRADED</span>
+        </div>
+      </div>
+
+      <!-- Version info -->
+      <div class="panel">
+        <div class="panel-label">CONFIGURATION</div>
+        <div class="status-row">
+          <span class="status-name">Minecraft</span>
+          <span class="status-value">1.20.4</span>
+        </div>
+        <div class="status-row">
+          <span class="status-name">Mod Loader</span>
+          <span class="status-value">FABRIC 0.15.11</span>
+        </div>
+        <div class="status-row">
+          <span class="status-name">Java</span>
+          <span class="status-value">17.0.10</span>
+        </div>
+        <div class="status-row">
+          <span class="status-name">Mods Installed</span>
+          <span class="status-value">6 / 6</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── Bottom action bar ─── -->
+  <div class="actionbar">
+    <div class="progress-info">
+      <div class="progress-bar"></div>
+      <div class="progress-text">ALL FILES VALIDATED · 0 PENDING</div>
+    </div>
+    <button class="launch-btn">BOARD TRAIN</button>
+  </div>
+
+</div>
+
+</body>
+</html>

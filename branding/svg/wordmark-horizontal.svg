@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 96" width="480" height="96">
+  <!--
+    FoundryMTR Horizontal Wordmark
+    For the top-left of the launcher window, header bars, etc.
+  -->
+  <defs>
+    <style>
+      .ring-outer { fill: none; stroke: #E8252B; stroke-width: 6; }
+      .ring-inner { fill: #0A0E14; }
+      .bar { fill: #E8252B; }
+      .mark-letters {
+        font-family: 'Inter', 'Helvetica Neue', sans-serif;
+        font-weight: 900;
+        font-size: 22px;
+        fill: #F2F4F7;
+        letter-spacing: 2px;
+      }
+      .word {
+        font-family: 'Inter', 'Helvetica Neue', sans-serif;
+        font-weight: 700;
+        font-size: 28px;
+        fill: #F2F4F7;
+        letter-spacing: 2px;
+      }
+      .sub {
+        font-family: 'Inter', 'Helvetica Neue', sans-serif;
+        font-weight: 500;
+        font-size: 10px;
+        fill: #8B95A3;
+        letter-spacing: 4px;
+      }
+    </style>
+  </defs>
+
+  <!-- Small roundel on the left -->
+  <circle cx="48" cy="48" r="38" class="ring-outer"/>
+  <circle cx="48" cy="48" r="35" class="ring-inner"/>
+  <rect x="6" y="38" width="84" height="20" class="bar"/>
+  <text x="48" y="55" text-anchor="middle" class="mark-letters">FOUNDRYMTR</text>
+
+  <!-- Wordmark to the right -->
+  <text x="108" y="52" class="word">MINECRAFT RAILWAY SERVER</text>
+  <text x="108" y="72" class="sub">PASSENGER LAUNCHER · v1.0</text>
+</svg>

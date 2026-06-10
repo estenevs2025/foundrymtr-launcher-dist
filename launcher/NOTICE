@@ -1,0 +1,14 @@
+FoundryMTR Launcher
+===================
+
+FoundryMTR and FoundryMC are registered trademarks of FoundryMC Services LLC.
+Copyright (c) 2025-2026 FoundryMC Services LLC.
+
+This product is a fork of HeliosLauncher (https://github.com/dscalzi/HeliosLauncher),
+Copyright (c) 2017-2026 Daniel D. Scalzi, distributed under the MIT License.
+The upstream license text is preserved verbatim in LICENSE.txt as required by
+its terms. The runtime libraries helios-core and helios-distribution-types are
+upstream packages by the same author and are used unmodified.
+
+Microsoft authentication uses an Azure application registration; the client id
+embedded in the source is a public application identifier, not a secret.

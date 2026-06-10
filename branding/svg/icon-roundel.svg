@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!--
+    FoundryMTR Roundel Mark (no sub-label)
+    For window icons, taskbar, dock icon.
+    Export to PNG at multiple sizes: 16, 32, 64, 128, 256, 512, 1024.
+  -->
+  <defs>
+    <style>
+      .ring-outer { fill: none; stroke: #E8252B; stroke-width: 18; }
+      .ring-inner { fill: #0A0E14; }
+      .bar { fill: #E8252B; }
+      .wordmark {
+        font-family: 'Inter', 'Helvetica Neue', sans-serif;
+        font-weight: 900;
+        font-size: 56px;
+        fill: #F2F4F7;
+        letter-spacing: 2px;
+      }
+    </style>
+  </defs>
+
+  <circle cx="128" cy="128" r="100" class="ring-outer"/>
+  <circle cx="128" cy="128" r="91" class="ring-inner"/>
+  <rect x="20" y="104" width="216" height="48" class="bar"/>
+  <text x="128" y="146" text-anchor="middle" class="wordmark">FMTR</text>
+</svg>

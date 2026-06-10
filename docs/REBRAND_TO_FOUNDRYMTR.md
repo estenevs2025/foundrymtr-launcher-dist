@@ -363,7 +363,7 @@ rg -i "mrs" --hidden `
   --glob '!docs/REBRAND_TO_FOUNDRYMTR.md'
 ```
 
-**Expected: ZERO hits** (rg exit code 1). The only sanctioned survivors of the legacy token in the whole repo are (a) the upstream LICENSE/NOTICE attribution files if they happen to contain it (they should not — they carry Helios/Scalzi text, not the legacy brand) and (b) **this document**, which quotes the find-targets by design. Any other hit is an unfinished rename. This catches `mrsNews*`, `mrs-theme`, `com.mrs.launcher`, `MRSLauncher-build`, `--mrs-*`, `mrs_station`, `mrs-dist` — everything.
+**Expected: ZERO hits** (rg exit code 1). The only sanctioned survivors of the legacy token in the whole repo are (a) the upstream LICENSE/NOTICE attribution files if they happen to contain it (they should not — they carry Helios/Scalzi text, not the legacy brand), (b) **this document**, which quotes the find-targets by design, and (c) **base64 coincidences inside `package-lock.json` `integrity` sha512 hashes** (e.g. a random `...XMrS...` letter run — cryptographic values, not brand tokens; verified harmless 2026-06-09). Any other hit is an unfinished rename. This catches `mrsNews*`, `mrs-theme`, `com.mrs.launcher`, `MRSLauncher-build`, `--mrs-*`, `mrs_station`, `mrs-dist` — everything.
 
 ### 8.2 The companion sweeps
 

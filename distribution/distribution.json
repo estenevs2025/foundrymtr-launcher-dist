@@ -1,0 +1,137 @@
+{
+  "version": "1.0.0",
+  "rss": "https://files.foundrymtr.com/news/news.txt",
+  "discord": {
+    "clientId": "<DISCORD_CLIENT_ID>",
+    "smallImageText": "FoundryMTR",
+    "smallImageKey": "foundrymtr_logo"
+  },
+  "java": {
+    "supported": "21.x",
+    "suggestedMajor": 21
+  },
+  "servers": [
+    {
+      "id": "foundrymtr-1.21.4",
+      "name": "FoundryMTR",
+      "description": "The official FoundryMTR modded server - auto-installs all required mods and connects you straight in.",
+      "icon": "https://files.foundrymtr.com/assets/icons/SealCircle.png",
+      "version": "1.0.0",
+      "address": "<SERVER_ADDRESS>",
+      "minecraftVersion": "1.21.4",
+      "discord": {
+        "shortId": "FoundryMTR",
+        "largeImageText": "FoundryMTR",
+        "largeImageKey": "foundrymtr_seal"
+      },
+      "mainServer": true,
+      "autoconnect": true,
+      "modules": [
+        {
+          "id": "net.fabricmc:fabric-loader:0.19.3",
+          "name": "Fabric (0.19.3)",
+          "type": "Fabric",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/libraries/net/fabricmc/fabric-loader/0.19.3/fabric-loader-0.19.3.json"
+          }
+        },
+        {
+          "id": "com.modrinth:mtr-nextgen:4.1.0-beta.1-ng.dev1+mc1.21.4",
+          "name": "MTR-NextGen (Minecraft Transit Railway)",
+          "type": "FabricMod",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/mods/mtr-nextgen-fabric-mc1.21.4-mtr4.1.0-beta.1-ng.dev1.jar"
+          }
+        },
+        {
+          "id": "com.modrinth:fabric-api:0.119.4+1.21.4",
+          "name": "Fabric API",
+          "type": "FabricMod",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/mods/fabric-api-0.119.4+1.21.4.jar"
+          }
+        },
+        {
+          "id": "com.modrinth:sodium:0.6.13+mc1.21.4",
+          "name": "Sodium",
+          "type": "FabricMod",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/mods/sodium-fabric-0.6.13+mc1.21.4.jar"
+          }
+        },
+        {
+          "id": "com.modrinth:lithium:0.15.3+mc1.21.4",
+          "name": "Lithium",
+          "type": "FabricMod",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/mods/lithium-fabric-0.15.3+mc1.21.4.jar"
+          }
+        },
+        {
+          "id": "com.modrinth:ferritecore:7.1.3",
+          "name": "FerriteCore",
+          "type": "FabricMod",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/mods/ferritecore-7.1.3-fabric.jar"
+          }
+        },
+        {
+          "id": "com.modrinth:debugify:1.21.4+1.1",
+          "name": "Debugify",
+          "type": "FabricMod",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/mods/Debugify-1.21.4+1.1.jar"
+          }
+        },
+        {
+          "id": "com.modrinth:modmenu:13.0.4",
+          "name": "Mod Menu",
+          "type": "FabricMod",
+          "required": {
+            "value": true
+          },
+          "artifact": {
+            "size": 0,
+            "MD5": "<MD5>",
+            "url": "https://files.foundrymtr.com/servers/foundrymtr/mods/modmenu-13.0.4.jar"
+          }
+        }
+      ]
+    }
+  ]
+}

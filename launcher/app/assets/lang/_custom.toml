@@ -1,0 +1,20 @@
+# Custom Language File for Launcher Customizer
+
+[ejs.app]
+title = "FoundryMTR Launcher V1.0.1 (MC 1.21.4 - MTR-NG 4.1.0)"
+
+[ejs.landing]
+mediaGitHubURL = "https://github.com/estenevs2025/foundrymtr-launcher-dist"
+mediaXURL = "#"
+mediaInstagramURL = "#"
+mediaYouTubeURL = "#"
+mediaDiscordURL = "#"
+
+[ejs.settings]
+sourceGithubLink = "https://github.com/estenevs2025/foundrymtr-launcher-dist"
+supportLink = "https://foundrymtr.com"
+
+[ejs.welcome]
+welcomeHeader = "WELCOME TO FOUNDRYMTR"
+welcomeDescription = "FoundryMTR is a modded Minecraft survival server built around Minecraft Transit Railway. Survive, gather, and build in a shared world where the central project is a real working transit network - stations, lines, signalling, and rolling stock. Found a station, extend a line, run a service, and connect your builds to the network everyone rides."
+welcomeDescCTA = "You are one stop away from the FoundryMTR network."

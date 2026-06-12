@@ -63,8 +63,32 @@ jobs:
           cache-dependency-path: launcher/package-lock.json
       - name: Install dependencies (lockfile)
         run: npm ci
-      - name: Build NSIS installer (unsigned; never auto-publish)
+      - name: Build NSIS installer (never auto-publish)
         run: npx electron-builder --win --x64 --publish never
+      # Windows production signing: Azure Trusted Signing, only when ALL
+      # secrets exist. Without them the artifact stays an unsigned test build.
+      - name: Sign installer (Azure Trusted Signing — optional)
+        if: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_SECRET != '' && secrets.TRUSTED_SIGNING_ENDPOINT != '' }}
+        uses: azure/trusted-signing-action@v0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.TRUSTED_SIGNING_CERT_PROFILE }}
+          files-folder: launcher/dist
+          files-folder-filter: exe
+      - name: Verify Windows signature (honest status)
+        shell: pwsh
+        env:
+          HAS_SIGNING: ${{ secrets.AZURE_TENANT_ID != '' && secrets.TRUSTED_SIGNING_ENDPOINT != '' }}
+        run: |
+          $exe = Get-ChildItem dist/*.exe | Select-Object -First 1
+          $sig = Get-AuthenticodeSignature $exe.FullName
+          $status = if ($sig.Status -eq 'Valid') { 'SIGNED-VERIFIED' } elseif ($env:HAS_SIGNING -eq 'true') { 'SIGNING ATTEMPTED BUT NOT VALID: ' + $sig.Status } else { 'UNSIGNED TEST BUILD (Azure Trusted Signing secrets missing)' }
+          "## Windows $env:BUILD_VERSION trust: $status" >> $env:GITHUB_STEP_SUMMARY
+          if ($env:HAS_SIGNING -eq 'true' -and $sig.Status -ne 'Valid') { Write-Error "Signing was configured but signature is $($sig.Status)"; exit 1 }
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -108,16 +132,49 @@ jobs:
       - name: Install dependencies (lockfile)
         run: npm ci
       - name: Build DMGs (signed/notarized ONLY if secrets exist; else unsigned)
+        # CRITICAL: CSC_* must be truly UNSET when secrets are absent.
+        # `env: CSC_LINK: ${{ secrets.X }}` injects an EMPTY STRING, which
+        # electron-builder treats as a defined cert path -> it resolves '' to
+        # the project dir and dies with ".../launcher is not a file" /
+        # "CSC_KEY_PASSWORD is not defined". Export conditionally in shell.
         env:
-          # Empty secrets leave these env vars empty -> electron-builder skips
-          # signing/notarization and produces honest unsigned artifacts.
-          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CSC_LINK != '' }}
-        run: npx electron-builder --mac --x64 --arm64 --publish never
+          MAC_CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          MAC_CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          MAC_APPLE_ID: ${{ secrets.APPLE_ID }}
+          MAC_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          MAC_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$MAC_CSC_LINK" ]; then
+            export CSC_LINK="$MAC_CSC_LINK"
+            export CSC_KEY_PASSWORD="$MAC_CSC_KEY_PASSWORD"
+            export CSC_IDENTITY_AUTO_DISCOVERY=true
+            if [ -n "$MAC_APPLE_ID" ]; then
+              export APPLE_ID="$MAC_APPLE_ID"
+              export APPLE_APP_SPECIFIC_PASSWORD="$MAC_APPLE_APP_SPECIFIC_PASSWORD"
+              export APPLE_TEAM_ID="$MAC_APPLE_TEAM_ID"
+            fi
+            echo "Signing enabled$( [ -n "$MAC_APPLE_ID" ] && echo ' + notarization' )"
+          else
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+            echo "No signing secrets — building UNSIGNED test artifacts"
+          fi
+          npx electron-builder --mac --x64 --arm64 --publish never
+      - name: Verify macOS signature/notarization (honest status)
+        env:
+          HAS_CERT: ${{ secrets.MAC_CSC_LINK != '' }}
+          HAS_NOTARY: ${{ secrets.APPLE_ID != '' }}
+        run: |
+          APP=$(find dist -maxdepth 3 -name '*.app' | head -1)
+          if [ "$HAS_CERT" = "true" ] && [ -n "$APP" ]; then
+            codesign --verify --deep --strict "$APP" && SIGN=OK || SIGN=FAILED
+            if [ "$HAS_NOTARY" = "true" ]; then
+              xcrun stapler validate "$APP" && NOTAR=STAPLED || NOTAR=NOT-STAPLED
+            else NOTAR=NOT-ATTEMPTED; fi
+            echo "signature=$SIGN notarization=$NOTAR"
+            [ "$SIGN" = "OK" ] || exit 1
+          else
+            echo "Unsigned test build — no verification possible"
+          fi
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:

@@ -18,11 +18,32 @@ upgrades, or a deliberate version bump in `launcher/package.json`.
 - Jobs: Windows NSIS x64 on `windows-latest`; macOS x64+arm64 DMG on `macos-latest` (unsigned, `CSC_IDENTITY_AUTO_DISCOVERY=false`). Both `npm ci` from the lockfile, `--publish never`, artifacts uploaded to the run.
 - The website admin "build" section does **not** dispatch this workflow — no GitHub token is stored server-side (deliberate). The admin endpoint returns the manual steps + workflow link. If you later want one-click triggering, add a fine-grained PAT (actions:write on this repo only) as a Pages secret and extend `POST /api/admin/launcher-builds/trigger`.
 
-## Required secrets (only for `publish_to_r2: true`)
+## Required secrets
+**R2 publish** (`publish_to_r2: true` only):
 | Secret | Value |
 |---|---|
 | `R2_ACCOUNT_ID` | Cloudflare account id |
 | `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | R2 S3 API token (scope: `foundrymtr-files` object write) |
+
+**Windows production signing** (Azure Trusted Signing; all required or build stays unsigned-test):
+| Secret | Value |
+|---|---|
+| `AZURE_TENANT_ID` / `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET` | Entra app with Trusted Signing Certificate Profile Signer role |
+| `TRUSTED_SIGNING_ENDPOINT` | e.g. `https://eus.codesigning.azure.net` |
+| `TRUSTED_SIGNING_ACCOUNT` / `TRUSTED_SIGNING_CERT_PROFILE` | account + certificate profile names |
+CI verifies with `Get-AuthenticodeSignature` and FAILS the run if signing was configured but invalid.
+
+**macOS signing/notarization** (all of the first two for signing; all five for notarization):
+| Secret | Value |
+|---|---|
+| `MAC_CSC_LINK` | base64 Developer ID Application .p12 |
+| `MAC_CSC_KEY_PASSWORD` | .p12 password |
+| `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` | notarytool credentials |
+CI verifies with `codesign --verify` (+ `stapler validate` when notarizing).
+**Gotcha (was the 2026-06-12 build failure):** never map `CSC_LINK` directly from a
+possibly-empty secret — an empty string makes electron-builder resolve `''` as a
+cert path → `…/launcher is not a file` / `CSC_KEY_PASSWORD is not defined`. The
+workflow exports CSC vars from a shell guard only when non-empty.
 
 Without them, download the run artifacts and publish manually:
 `npx wrangler r2 object put foundrymtr-files/launcher/releases/win/<ver>/FoundryMTR-Setup-<ver>.exe --file=...` (+ `.blockmap`), then the rewritten `latest.yml` at `launcher/releases/win/latest.yml`.

@@ -1,25 +1,29 @@
-# Launcher APP build — manual dispatch only (workflow_dispatch).
+# Launcher APP build — fires on manual dispatch OR a `launcher-v*` tag push.
+# (Tag trigger exists so builds can be started without a GitHub token: pushing
+# the tag launcher-v1.0.1 builds Windows + macOS for that ref.)
 #
-# This builds the Electron launcher INSTALLERS. It is NOT part of the modpack
-# flow: uploading mod jars / publishing distribution.json never triggers this.
-# Run it only when the launcher application itself changes (Electron code,
-# branding, update-feed config, version bump). See docs/LAUNCHER_BUILD_CONTRACT.md.
+# NOT part of the modpack flow: mod uploads / distribution publishes never
+# trigger this. See docs/LAUNCHER_BUILD_CONTRACT.md.
 #
-# R2 publish is optional and only runs when BOTH the publish_to_r2 input is
-# true AND the repo has R2 S3 credentials configured as Actions secrets:
-#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY
-# Without them the run still produces installer artifacts for manual release.
-# Code signing is NOT configured (no certificates) — Windows builds are
-# unsigned (SmartScreen warning expected); macOS auto-update requires signing
-# and therefore stays a direct-download flow until certificates exist.
+# Signing reality (no faking):
+#   - Windows: always unsigned NSIS (no Authenticode cert configured).
+#   - macOS:   unsigned by default. If MAC_CSC_LINK/MAC_CSC_KEY_PASSWORD repo
+#     secrets exist the app is SIGNED; if APPLE_ID/APPLE_APP_SPECIFIC_PASSWORD/
+#     APPLE_TEAM_ID also exist electron-builder NOTARIZES automatically.
+#     Without them artifacts are honest unsigned test builds.
+# R2 publish (optional): needs R2_ACCOUNT_ID/R2_ACCESS_KEY_ID/R2_SECRET_ACCESS_KEY
+# and only runs on manual dispatch with publish_to_r2=true. Tag builds always
+# stop at GitHub artifacts.
 
 name: build-launcher
 
 on:
+  push:
+    tags: ['launcher-v*']
   workflow_dispatch:
     inputs:
       version:
-        description: 'Launcher app version being built (informational; package.json is authoritative)'
+        description: 'Launcher app version (informational; package.json is authoritative)'
         required: true
         type: string
       channel:
@@ -29,29 +33,26 @@ on:
         options: [stable, beta]
         default: stable
       build_windows:
-        description: 'Build Windows x64 NSIS installer'
         type: boolean
         default: true
       build_macos:
-        description: 'Build macOS x64 + arm64 DMGs (unsigned — no auto-update)'
         type: boolean
-        default: false
+        default: true
       publish_to_r2:
-        description: 'Publish artifacts to R2 (requires R2_* secrets)'
+        description: 'Publish to R2 (requires R2_* secrets; never on tag builds)'
         type: boolean
         default: false
-      release_notes:
-        description: 'Release notes (recorded in the run summary)'
-        type: string
-        default: ''
 
 defaults:
   run:
     working-directory: launcher
 
+env:
+  BUILD_VERSION: ${{ github.event_name == 'push' && github.ref_name || inputs.version }}
+
 jobs:
   windows:
-    if: ${{ inputs.build_windows }}
+    if: ${{ github.event_name == 'push' || inputs.build_windows }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,46 +63,40 @@ jobs:
           cache-dependency-path: launcher/package-lock.json
       - name: Install dependencies (lockfile)
         run: npm ci
-      - name: Lint (non-blocking record)
-        run: npm run lint --if-present
-        continue-on-error: true
-      - name: Build NSIS installer (never auto-publish)
+      - name: Build NSIS installer (unsigned; never auto-publish)
         run: npx electron-builder --win --x64 --publish never
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer-${{ inputs.version }}
+          name: windows-installer-${{ env.BUILD_VERSION }}
           path: |
             launcher/dist/*.exe
             launcher/dist/*.blockmap
             launcher/dist/latest.yml
           if-no-files-found: error
-      - name: Publish to R2 (optional)
-        if: ${{ inputs.publish_to_r2 }}
+      - name: Publish to R2 (manual dispatch only, requires secrets)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_r2 }}
         shell: pwsh
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.BUILD_VERSION }}
         run: |
           if (-not $env:R2_ACCOUNT_ID) { Write-Error 'R2 secrets are not configured; cannot publish.'; exit 1 }
           $endpoint = "https://$env:R2_ACCOUNT_ID.r2.cloudflarestorage.com"
-          # Versioned installers under <version>/, channel file at the platform root.
           aws s3 cp dist/ "s3://foundrymtr-files/launcher/releases/win/$env:VERSION/" --recursive --exclude '*' --include '*.exe' --include '*.blockmap' --endpoint-url $endpoint
-          # latest.yml must reference the versioned paths; the release runbook
-          # rewrites url/path fields to "<version>/<file>" before upload.
           (Get-Content dist/latest.yml) -replace '(url|path): (FoundryMTR-Setup-)', ('$1: ' + $env:VERSION + '/$2') | Set-Content dist/latest.fixed.yml
           aws s3 cp dist/latest.fixed.yml "s3://foundrymtr-files/launcher/releases/win/latest.yml" --content-type 'text/yaml' --cache-control 'public, max-age=60, must-revalidate' --endpoint-url $endpoint
-      - name: Run summary
+      - name: Summary
         shell: pwsh
         run: |
-          "## Windows build ${{ inputs.version }} (${{ inputs.channel }})" >> $env:GITHUB_STEP_SUMMARY
-          "Notes: ${{ inputs.release_notes }}" >> $env:GITHUB_STEP_SUMMARY
-          "After download/publish: register the release in /admin/launcher (installer key, latest.yml key, SHA-512 from latest.yml, size), Validate, then Promote to latest." >> $env:GITHUB_STEP_SUMMARY
+          "## Windows build $env:BUILD_VERSION — UNSIGNED (SmartScreen will warn)" >> $env:GITHUB_STEP_SUMMARY
+          "Artifact: windows-installer-$env:BUILD_VERSION (download from this run)" >> $env:GITHUB_STEP_SUMMARY
+          "Next: upload installer + .blockmap + rewritten latest.yml to launcher/releases/win/, register in /admin/launcher, Validate, Promote." >> $env:GITHUB_STEP_SUMMARY
 
   macos:
-    if: ${{ inputs.build_macos }}
+    if: ${{ github.event_name == 'push' || inputs.build_macos }}
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -112,31 +107,46 @@ jobs:
           cache-dependency-path: launcher/package-lock.json
       - name: Install dependencies (lockfile)
         run: npm ci
-      - name: Build DMGs (unsigned; never auto-publish)
-        # CSC_IDENTITY_AUTO_DISCOVERY=false prevents electron-builder from
-        # attempting (and failing) signing on the runner.
+      - name: Build DMGs (signed/notarized ONLY if secrets exist; else unsigned)
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          # Empty secrets leave these env vars empty -> electron-builder skips
+          # signing/notarization and produces honest unsigned artifacts.
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CSC_LINK != '' }}
         run: npx electron-builder --mac --x64 --arm64 --publish never
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos-installers-${{ inputs.version }}
+          name: macos-installers-${{ env.BUILD_VERSION }}
           path: |
             launcher/dist/*.dmg
             launcher/dist/*.blockmap
             launcher/dist/latest-mac.yml
           if-no-files-found: error
-      - name: Publish to R2 (optional)
-        if: ${{ inputs.publish_to_r2 }}
+      - name: Publish to R2 (manual dispatch only, requires secrets)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_r2 }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.BUILD_VERSION }}
         run: |
           if [ -z "$R2_ACCOUNT_ID" ]; then echo 'R2 secrets are not configured; cannot publish.' >&2; exit 1; fi
           endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
           aws s3 cp dist/ "s3://foundrymtr-files/launcher/releases/mac/${VERSION}/" --recursive --exclude '*' --include '*.dmg' --include '*.blockmap' --endpoint-url "$endpoint"
           sed -E "s#(url|path): (FoundryMTR-Setup-)#\1: ${VERSION}/\2#" dist/latest-mac.yml > dist/latest-mac.fixed.yml
           aws s3 cp dist/latest-mac.fixed.yml "s3://foundrymtr-files/launcher/releases/mac/latest-mac.yml" --content-type 'text/yaml' --cache-control 'public, max-age=60, must-revalidate' --endpoint-url "$endpoint"
+      - name: Summary (honest signing status)
+        env:
+          HAS_CERT: ${{ secrets.MAC_CSC_LINK != '' }}
+          HAS_NOTARY: ${{ secrets.APPLE_ID != '' }}
+        run: |
+          if [ "$HAS_CERT" = "true" ] && [ "$HAS_NOTARY" = "true" ]; then S="SIGNED + NOTARIZED";
+          elif [ "$HAS_CERT" = "true" ]; then S="SIGNED (not notarized — APPLE_ID secrets missing)";
+          else S="UNSIGNED test build (MAC_CSC_LINK secret missing) — right-click > Open required; auto-update will NOT work on macOS"; fi
+          echo "## macOS build $BUILD_VERSION — $S" >> "$GITHUB_STEP_SUMMARY"
+          echo "Artifact: macos-installers-$BUILD_VERSION" >> "$GITHUB_STEP_SUMMARY"

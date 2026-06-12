@@ -54,6 +54,10 @@ jobs:
   windows:
     if: ${{ github.event_name == 'push' || inputs.build_windows }}
     runs-on: windows-latest
+    env:
+      # secrets context is NOT allowed in step-level `if:` (it invalidates the
+      # whole workflow file) — bridge through job env and test env in the if.
+      HAS_AZURE_SIGNING: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_SECRET != '' && secrets.TRUSTED_SIGNING_ENDPOINT != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,8 +72,8 @@ jobs:
       # Windows production signing: Azure Trusted Signing, only when ALL
       # secrets exist. Without them the artifact stays an unsigned test build.
       - name: Sign installer (Azure Trusted Signing — optional)
-        if: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_SECRET != '' && secrets.TRUSTED_SIGNING_ENDPOINT != '' }}
-        uses: azure/trusted-signing-action@v0
+        if: ${{ env.HAS_AZURE_SIGNING == 'true' }}
+        uses: azure/trusted-signing-action@v2
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -82,7 +86,7 @@ jobs:
       - name: Verify Windows signature (honest status)
         shell: pwsh
         env:
-          HAS_SIGNING: ${{ secrets.AZURE_TENANT_ID != '' && secrets.TRUSTED_SIGNING_ENDPOINT != '' }}
+          HAS_SIGNING: ${{ env.HAS_AZURE_SIGNING }}
         run: |
           $exe = Get-ChildItem dist/*.exe | Select-Object -First 1
           $sig = Get-AuthenticodeSignature $exe.FullName
